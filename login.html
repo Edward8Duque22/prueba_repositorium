@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login — Archivo Creativo</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+</head>
+<body>
+    <div class="login-container">
+        <h2>Panel Administrativo</h2>
+        <input type="password" id="clave" placeholder="Contraseña"
+               onkeydown="if(event.key==='Enter') validar()">
+        <button onclick="validar()">Entrar</button>
+        <p id="login-error" style="color:#f87171;display:none;margin-top:10px;">Clave incorrecta.</p>
+    </div>
+
+    <script>
+        // Si ya está autenticado, ir directo al panel
+        if (localStorage.getItem('admin_auth') === 'true') {
+            window.location.href = 'admin.html';
+        }
+
+        async function validar() {
+            const p = document.getElementById('clave').value;
+            if (!p) return;
+
+            const h = CryptoJS.SHA256(p).toString();
+
+            try {
+                // Ruta unificada: /api?accion=login
+                const res = await fetch(`/api?accion=login&h=${h}`);
+                if (res.ok) {
+                    localStorage.setItem('admin_auth', 'true');
+                    window.location.href = 'admin.html';
+                } else {
+                    document.getElementById('login-error').style.display = 'block';
+                }
+            } catch (err) {
+                console.error('Error de red en login:', err);
+                alert('No se pudo conectar con el servidor.');
+            }
+        }
+    </script>
+</body>
+</html>

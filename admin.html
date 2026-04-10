@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Administración — Archivo Creativo</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@600;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+    <script>
+        // Protección de ruta: redirige si no está autenticado
+        if (localStorage.getItem('admin_auth') !== 'true') {
+            window.location.href = 'login.html';
+        }
+    </script>
+</head>
+<body>
+
+<header>
+    <div class="header-brand">
+        <div class="logo-mark">⚙️</div>
+        <div>
+            <h1>Panel Admin</h1>
+            <p>ARCHIVO CREATIVO</p>
+        </div>
+    </div>
+    <div class="header-right">
+        <button class="btn btn-danger" onclick="localStorage.clear(); location.href='login.html'">
+            Salir
+        </button>
+    </div>
+</header>
+
+<div class="container admin-layout">
+
+    <!-- ── Formulario de nuevo proyecto ─────────────────────── -->
+    <aside class="admin-sidebar">
+        <h3>Nuevo Proyecto</h3>
+        <div class="form-group">
+            <input type="text"  id="titulo" placeholder="Título *">
+            <input type="date"  id="fecha">
+            <input type="file"  id="foto" accept="image/*">
+            <input type="text"  id="repo" placeholder="URL del repositorio">
+            <input type="text"  id="live" placeholder="URL del demo en vivo">
+            <textarea           id="desc" placeholder="Descripción breve"></textarea>
+            <button class="btn btn-accent btn-full" onclick="agregarProyecto()">
+                Guardar proyecto
+            </button>
+        </div>
+    </aside>
+
+    <!-- ── Lista de proyectos existentes ────────────────────── -->
+    <main class="admin-main">
+        <div id="admin-lista" class="admin-list-container">
+            <p style="color:var(--text-muted);padding:20px;">Cargando proyectos…</p>
+        </div>
+    </main>
+
+</div>
+
+<!-- script.js provee: agregarProyecto(), eliminarProyecto(), cargarProyectos() -->
+<script src="script.js"></script>
+<script>
+    async function cargarAdmin() {
+        const lista = document.getElementById('admin-lista');
+        try {
+            const proyectos = await cargarProyectos();
+
+            if (proyectos.length === 0) {
+                lista.innerHTML = '<p style="color:var(--text-muted);padding:20px;">No hay proyectos en la base de datos.</p>';
+                return;
+            }
+
+            lista.innerHTML = proyectos.map(p => `
+                <div class="admin-card">
+                    <img src="${p.img}" alt="${p.titulo}" class="admin-thumb">
+                    <div class="admin-card-info">
+                        <strong>${p.titulo}</strong>
+                        <small>${p.fecha || ''}</small>
+                        ${p.desc ? `<span class="admin-desc">${p.desc}</span>` : ''}
+                    </div>
+                    <div class="admin-card-actions">
+                        ${p.live && p.live !== '#' ? `<a href="${p.live}" target="_blank" class="btn btn-accent" style="font-size:0.75rem;padding:6px 12px;">Demo</a>` : ''}
+                        <button class="btn btn-danger" onclick="eliminarProyecto('${p._id}')">Eliminar 🗑️</button>
+                    </div>
+                </div>
+            `).join('');
+
+        } catch (err) {
+            console.error('Error al cargar admin:', err);
+            lista.innerHTML = '<p style="color:#f87171;padding:20px;">Error al conectar con la base de datos.</p>';
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', cargarAdmin);
+</script>
+</body>
+</html>

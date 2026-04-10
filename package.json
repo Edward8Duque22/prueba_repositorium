@@ -1,0 +1,12 @@
+{
+  "name": "repositorio-proyectos",
+  "version": "1.0.0",
+  "description": "Repositorio creativo personal con MongoDB",
+  "main": "api/index.js",
+  "dependencies": {
+    "mongodb": "^6.5.0"
+  },
+  "engines": {
+    "node": "18.x"
+  }
+}
